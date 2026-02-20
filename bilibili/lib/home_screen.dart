@@ -14,7 +14,6 @@ class HomeScreen extends StatelessWidget {
     // 用了 DefaultTabController，只要声明 length（有几个 Tab），它就会自动把内部的 TabBar 和 TabBarView 绑定在一起！
     return DefaultTabController(
       length: 4, // 根据截图，我们先做4个分类：直播、推荐、热门、动画
-      
       // 【为什么要再套一个 Scaffold？】
       // 虽然我们在 main.dart 已经有了一个最外层的 Scaffold，但那是为了装底部导航栏的。
       // 现在的 HomeScreen 是其中的一个页面，它自己也需要一个标准的“顶部栏 (AppBar)”，
@@ -23,7 +22,6 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white, // B站顶部是白色的
           elevation: 0, // 【为什么要设为0？】去掉 AppBar 默认自带的底部阴影，让它和下面的页面融为一体，更现代。
-          
           // 1. leading: AppBar 左侧的专属插槽，通常放返回键，这里放用户头像
           leading: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -31,12 +29,12 @@ class HomeScreen extends StatelessWidget {
             // 如果自己用 Container 写圆角裁剪图片很麻烦。CircleAvatar 专门用来做圆形头像，
             // 只需要给它一张图片，它自动帮你裁成完美的圆形。
             child: const CircleAvatar(
-              // 这里暂时用网络占位图，后续你可以换成 AssetImage 加载本地图片
-              backgroundImage: AssetImage("assets/images/1.jpg"), 
+              //  AssetImage 加载本地图片
+              backgroundImage: AssetImage("assets/images/1.jpg"),
               radius: 20,
             ),
           ),
-          
+
           // 2. title: AppBar 中间的专属插槽，放搜索框
           title: Container(
             height: 36, // 控制假搜索框的高度
@@ -45,7 +43,7 @@ class HomeScreen extends StatelessWidget {
             // 首页的搜索框通常是个“假按钮”，点击后跳转到专门的搜索页才弹出键盘。
             // BoxDecoration 可以帮我们画出那个灰色的、带圆角的胶囊背景。
             decoration: BoxDecoration(
-              color: Colors.grey[100], 
+              color: Colors.grey[100],
               borderRadius: BorderRadius.circular(18), // 圆角弧度等于高度的一半，就是完美的胶囊形
             ),
             child: Row(
@@ -54,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                 Icon(Icons.search, color: Colors.grey, size: 20), // 放大镜图标
                 SizedBox(width: 5),
                 Text(
-                  '鸣潮光头哥', // 对应你截图里的搜索词
+                  "搜索", // 使用空字符串占位
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
               ],
@@ -65,7 +63,10 @@ class HomeScreen extends StatelessWidget {
           actions: [
             // 游戏中心图标
             IconButton(
-              icon: const Icon(Icons.sports_esports_outlined, color: Colors.black54),
+              icon: const Icon(
+                Icons.sports_esports_outlined,
+                color: Colors.black54,
+              ),
               onPressed: () {
                 // 点击事件留空，后续可以加跳转
               },
@@ -87,7 +88,7 @@ class HomeScreen extends StatelessWidget {
             indicatorColor: Color(0xFFFB7299), // 底部指示器（那根滑动的小横线）的颜色
             // 【为什么用 label 尺寸？】
             // 默认情况下小横线会占满整个格子的宽度，设为 label 后，横线只会和文字一样宽，更精致。
-            indicatorSize: TabBarIndicatorSize.label, 
+            indicatorSize: TabBarIndicatorSize.label,
             // 移除点击时的水波纹高亮效果，更贴近原生 App 体验
             splashFactory: NoSplash.splashFactory,
             tabs: [
@@ -98,18 +99,194 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        
+
         // 【为什么要用 TabBarView？】
         // 它是 TabBar 的最佳搭档。TabBar 控制头部标签，TabBarView 控制身体内容。
         // 它自带左右滑动手势。注意：这里的 children 数量（4个）必须和上面 tabs 的数量严格一致，否则会报错！
-        body: const TabBarView(
+        // 【为什么要用 TabBarView？】
+        // 它与顶部的 TabBar 联动，负责展示不同分类下的页面内容。
+        body: TabBarView(
           children: [
-            Center(child: Text('这里是【直播】页面', style: TextStyle(fontSize: 20))),
-            Center(child: Text('这里是【推荐】页面\n（下一阶段我们在这里画视频网格）', textAlign: TextAlign.center)),
-            Center(child: Text('这里是【热门】页面\n（下一阶段我们在这里画大卡片列表）', textAlign: TextAlign.center)),
-            Center(child: Text('这里是【动画】页面', style: TextStyle(fontSize: 20))),
+            const Center(
+              child: Text('这里是【直播】页面', style: TextStyle(fontSize: 20)),
+            ),
+
+            // 🌟 核心 1：【推荐】页面的双列网格
+            // 【为什么要用 GridView.builder 而不是 GridView.count？】
+            // .builder 是“懒加载”的，只有滑动到屏幕上的卡片才会被渲染，
+            // 像 B站这样有无数个视频的列表，如果不用懒加载，手机会直接卡死内存溢出。
+            GridView.builder(
+              padding: const EdgeInsets.all(8.0), // 整个网格的外边距
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // 【为什么是2？】定义为双列布局
+                crossAxisSpacing: 8.0, // 列与列之间的间距
+                mainAxisSpacing: 8.0, // 行与行之间的间距
+                childAspectRatio: 0.85, // 【控制卡片高宽比】数字越小卡片越长，你可以根据感觉微调这个数字
+              ),
+              itemCount: 50, // 假设先加载 10 个视频
+              itemBuilder: (context, index) {
+                // 每次循环，就画出一个我们在下面自定义的 RecommendCard
+                return const RecommendCard();
+              },
+            ),
+
+            // 🌟 核心 2：【热门】页面的单列列表
+            // 【为什么要用 ListView.builder？】
+            // 同理，这也是为了无限滚动的懒加载。它天然就是单列往下排的。
+            ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                // 每次循环，画出一个 HotVideoCard
+                return const HotVideoCard();
+              },
+            ),
+
+            const Center(
+              child: Text('这里是【动画】页面', style: TextStyle(fontSize: 20)),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class RecommendCard extends StatelessWidget {
+  const RecommendCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                color: Colors.grey[300],
+                child: Image.asset("assets/images/2.png", fit: BoxFit.cover),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "占位符",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.play_circle_outline,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        "11.1万",
+                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.more_vert, size: 14, color: Colors.grey),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HotVideoCard extends StatelessWidget {
+  const HotVideoCard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0),
+      height: 100,
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 160,
+              height: 100,
+              color: Colors.grey[300],
+              child: Image.asset("assets/images/3.png", fit: BoxFit.cover),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "占位文字",
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: const Color(0xFFFB7299),
+                          width: 0.5,
+                        ),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: const Text(
+                        "百万播放",
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFFFB7299),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: const [
+                        Icon(
+                          Icons.person_outline,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          "占位符",
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        Spacer(),
+                        Icon(Icons.more_vert, size: 14, color: Colors.grey),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
