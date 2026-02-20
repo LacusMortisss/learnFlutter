@@ -1,3 +1,4 @@
+import 'package:bilibili/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 
@@ -48,7 +49,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const Center(child: Text('第一阶段占位：发布页面', style: TextStyle(fontSize: 20))),
-    const Center(child: Text('第一阶段占位：我的内容', style: TextStyle(fontSize: 20))),
+    const ProfileScreen(),
   ];
 
   @override
